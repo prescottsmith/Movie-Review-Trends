@@ -1,5 +1,5 @@
 import requests
-from bs4 import BeautifulSoup, ResultSet
+from bs4 import BeautifulSoup
 import pandas as pd
 
 base_url = 'https://www.rottentomatoes.com'
@@ -67,6 +67,10 @@ class RT:
         """Saves dataframe to csv file in directory"""
         self.to_csv(r'rottentomatoes_chart.csv', index = False, header=True)
 
+##############
+# TEST CASES #
+##############
+
 def main():
     print('Processing...please wait...')
     url = base_url + chart_href
@@ -76,8 +80,8 @@ def main():
     movie_parse = RT.movie_parse(movies_soup)
     df1 = RT.framed(chart_parse)
     df2 = RT.framed(movie_parse)
-    main_df = df1.join(df2)
-    main_df.RT.save_items()
+    full_df = df1.join(df2)
+    RT.save_items(full_df)
     print("Scraping complete. Rotten Tomatoes chart data saved to csv file in directory")
 
 def scrape():
@@ -89,13 +93,13 @@ def scrape():
     movie_parse = RT.movie_parse(movies_soup)
     df1 = RT.framed(chart_parse)
     df2 = RT.framed(movie_parse)
-    main_df = df1.join(df2)
+    full_df = df1.join(df2)
     print(("Scraping complete. Hopefully you remembered to assign a variable ;)"))
-    return main_df
+    return full_df
 
 
 if __name__ == '__main__':
     main()
 
 else: print(" Call the function scrape() from the rt_collect module, and assign it to a variable"
-            " e.g. df = rt.collect.scrape() ")
+            "\n e.g. df = rt_collect.scrape() ")
