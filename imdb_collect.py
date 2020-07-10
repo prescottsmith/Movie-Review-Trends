@@ -1,6 +1,6 @@
 # Importing packages
 import requests
-from bs4 import BeautifulSoup, ResultSet
+from bs4 import BeautifulSoup
 import pandas as pd
 
 class IMDBscraper:
@@ -19,8 +19,6 @@ class IMDBscraper:
 
         url = base_url+top250
 
-        def __init__(url):
-            url = base_url+top250
 
         def parse_chart(self):
             """Extracts imdb chart data from HTTP response.
