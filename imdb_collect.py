@@ -82,19 +82,10 @@ class IMDBscraper:
             df_imdb_full = df_imdb.join(df_imdb_details)
             return df_imdb_full
 
-        end = framed(scrape(url))
-        print("Scraping complete. A new DataFrame 'imdb' has been Created")
-        return end
+        result = framed(scrape(url))
+        print("Scraping complete. Hopefully you remembered to assign this function to a variable"
+              "so that the data frame is in your environment")
+        return result
 
 
-        #def imdb_scrape():
-            #end = framed(scrape(url))
-            #return end
-            #print("DataFrame Created")
 
-    #if __name__ == '__main__':
-    #    scraper = IMDBscraper(url=url)
-    #    scraper.scrape()
-
-    #    return df_imdb
-    #    print("DataFrame Created")
