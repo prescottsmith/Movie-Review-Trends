@@ -59,30 +59,23 @@ class RT:
             rottentomatoes.append(rt_data)
         return rottentomatoes
 
-    def framed(self):
-        frame = pd.DataFrame(self)
-        return frame
+    def framed(self, self2):
+        frame1 = pd.DataFrame(self)
+        frame2 = pd.DataFrame(self2)
+        full_frame = frame1.join(frame2)
+        return full_frame
 
     def save_items(self):
         """Saves dataframe to csv file in directory"""
         self.to_csv(r'rottentomatoes_chart.csv', index = False, header=True)
 
+
 ##############
 # TEST CASES #
 ##############
 
-def main():
-    print('Processing...please wait...')
-    url = base_url + chart_href
-    chart_soup = RT.chart_soup(url)
-    movies_soup = RT.movies_soup(chart_soup)
-    chart_parse = RT.chart_parse(chart_soup)
-    movie_parse = RT.movie_parse(movies_soup)
-    df1 = RT.framed(chart_parse)
-    df2 = RT.framed(movie_parse)
-    full_df = df1.join(df2)
-    RT.save_items(full_df)
-    print("Scraping complete. Rotten Tomatoes chart data saved to csv file in directory")
+
+##############
 
 def scrape():
     print('Processing...please wait...')
@@ -91,11 +84,14 @@ def scrape():
     movies_soup = RT.movies_soup(chart_soup)
     chart_parse = RT.chart_parse(chart_soup)
     movie_parse = RT.movie_parse(movies_soup)
-    df1 = RT.framed(chart_parse)
-    df2 = RT.framed(movie_parse)
-    full_df = df1.join(df2)
-    print(("Scraping complete. Hopefully you remembered to assign a variable ;)"))
+    full_df = RT.framed(chart_parse, movie_parse)
+    print(("Scraping complete."))
     return full_df
+
+def main():
+    full_df = scrape()
+    RT.save_items(full_df)
+    print("Rotten Tomatoes chart data saved to csv file in directory")
 
 
 if __name__ == '__main__':

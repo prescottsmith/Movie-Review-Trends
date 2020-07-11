@@ -84,18 +84,9 @@ class MC:
         """Saves dataframe to csv file in directory"""
         self.to_csv(r'metacritic_chart.csv', index = False, header=True)
 
-def main():
-    print('Processing...please wait...')
-    url = base_url + chart_href
-    chart_soup = MC.chart_soup(url)
-    movies_soup = MC.movies_soup(chart_soup)
-    chart_parse = MC.chart_parse(chart_soup)
-    movie_parse = MC.movie_parse(movies_soup)
-    full_df = MC.framed(chart_parse, movie_parse)
-    #df2 = MC.framed(movie_parse)
-    #full_df = df1.join(df2)
-    MC.save_items(full_df)
-    print("Scraping complete. Metacritic chart data saved to csv file in directory")
+##############
+# TEST CASES #
+##############
 
 def scrape():
     print('Processing...please wait...')
@@ -105,11 +96,13 @@ def scrape():
     chart_parse = MC.chart_parse(chart_soup)
     movie_parse = MC.movie_parse(movies_soup)
     full_df = MC.framed(chart_parse, movie_parse)
-    #df1 = MC.framed(chart_parse)
-    #df2 = MC.framed(movie_parse)
-    #full_df = df1.join(df2)
-    print(("Scraping complete. Hopefully you remembered to assign a variable ;)"))
+    print(("Scraping complete."))
     return full_df
+
+def main():
+    full_df = scrape()
+    MC.save_items(full_df)
+    print("Metacritic chart data saved to csv file in directory")
 
 
 if __name__ == '__main__':
