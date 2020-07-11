@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
+
 base_url = 'https://www.imdb.com'
 top250 = '/chart/top/?ref_=nv_mv_250'
 
@@ -52,11 +53,11 @@ class IMDB:
     def movie_parse(self):
         imdb_details = []
         for movie in self:
-            genre = movie.splitlines()[6].strip().replace(',',
-                                                              '')  # this only pulls the first genre listed. See below for more info
-            rated = movie.splitlines()[1].strip()
-            runtime = movie.splitlines()[3].strip()
-            released = movie.splitlines()[-2].strip()
+            details = movie.split(sep='|')
+            genre = details[2].strip().replace('\n','')
+            rated = details[0].strip()
+            runtime = details[1].strip()
+            released = details[-1].strip()
             details_data = {"Genre": genre, "Rated": rated, 'Runtime': runtime, 'Release Date': released}
             imdb_details.append(details_data)
         return imdb_details
@@ -80,6 +81,7 @@ class IMDB:
 
 
 ##############
+
 
 def scrape():
     print('Processing...please wait...')
