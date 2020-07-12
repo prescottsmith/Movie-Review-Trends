@@ -96,7 +96,7 @@ def scrape():
     chart_parse = MC.chart_parse(chart_soup)
     movie_parse = MC.movie_parse(movies_soup)
     full_df = MC.framed(chart_parse, movie_parse)
-    print(("Scraping complete."))
+    print(("Metacritic scraping complete."))
     return full_df
 
 def main():

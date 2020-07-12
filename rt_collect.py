@@ -85,7 +85,7 @@ def scrape():
     chart_parse = RT.chart_parse(chart_soup)
     movie_parse = RT.movie_parse(movies_soup)
     full_df = RT.framed(chart_parse, movie_parse)
-    print(("Scraping complete."))
+    print(("Rotten Tomatoes scraping complete."))
     return full_df
 
 def main():

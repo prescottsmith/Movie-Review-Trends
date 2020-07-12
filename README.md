@@ -6,3 +6,5 @@ find correlations between certain details of a movie, and a rating sites' review
 Are older movies favored over newer movies?
 Does runtime play a significant role?
 Are more mature movies given better reviews?
+Are some sites more biased than others?
+

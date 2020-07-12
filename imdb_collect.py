@@ -92,7 +92,7 @@ def scrape():
     chart_parse = IMDB.chart_parse(chart_soup)
     movie_parse = IMDB.movie_parse(movies_soup)
     full_df = IMDB.framed(chart_parse, movie_parse)
-    print(("Scraping complete."))
+    print(("IMDB scraping complete."))
     return full_df
 
 def main():
