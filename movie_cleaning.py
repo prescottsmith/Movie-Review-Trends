@@ -1,12 +1,41 @@
 import pandas
+from pytimeparse.timeparse import timeparse
+import dateutil.parser as dparser
 
+ratings_list = [' R ',
+               ' M ',#this is now PG
+               ' MA ',
+               ' PG-13 ',
+               ' TV-14 ',
+               ' TV-G ',
+               ' TV-PG ',
+               ' TV-R ',
+               ' GP ',#this is PG
+               ' PG ',
+               ' M/PG ',
+               ' G ',
+               ' Approved ',
+               ' Passed ',
+               ' Not Rated ',
+               ' NR ',
+               ' Unrated ']
 
 class CL:
 
+
+    def ratings_update(self):
+        self = self.replace(' M ', ' PG ')
+        self = self.replace(' GP ', ' PG ')
+        self = self.replace(' TV-G ', ' G ')
+        self = self.replace(' TV-PG ', ' PG ')
+        self = self.replace(' TV-14 ', ' PG-13 ') #Closest approximation
+        self = self.replace(' NR ', ' Not Rated ')
+        return self
+
     def genres(self):
         cleaned_genres = []
-        for index in range(len(self['Genre'])):
-            list = self[['Genre'][index].split(sep=',')
+        for genres in self['Genre']:
+            list = genres.split(sep=',')
             row = []
             for item in list:
                 new = item.replace(' ', '')
@@ -18,22 +47,34 @@ class CL:
 
     def rated(self):
         cleaned_rating = []
-        for index in range(len(self['Rated'])):
-
+        for row in self['Rated']:
+            row = ' ' + row + ' '
+            new_rating = ''.join([rating for rating in ratings_list if rating in row]).strip()
+            new_rating = CL.ratings_update(new_rating)
+            cleaned_rating.append(new_rating)
         self['Rated'] = cleaned_rating
         return self
 
     def runtime(self):
         cleaned_runtime = []
-        for index in range(len(self['Runtime'])):
-
-        self['Runtim'] = cleaned_runtime
+        for row in self['Runtime']:
+            row = row.replace(' ', '')
+            row = row.replace('minutes', 'm')
+            row = row.replace('min', 'm')
+            try:
+                minutes = timeparse(row)/60
+            except:
+                minutes = 0
+            cleaned_runtime.append(minutes)
+        self['Runtime'] = cleaned_runtime
         return self
 
     def release(self):
         cleaned_release = []
-        for index in range(len(self['Release Date'])):
-
+        for row in self['Release Date']:
+            scrub = row.replace('Release Date', '')
+            date = dparser.parse(scrub, fuzzy=True).date()
+            cleaned_release.append(date)
         self['Release Date'] = cleaned_release
         return self
 
@@ -51,7 +92,7 @@ def clean(movie_data):
     cleaned = release_cleaned
     return cleaned
 
-def main(file)
+#def main(file)
     #import csv file
     #run clean
     #export back to csv
@@ -59,16 +100,6 @@ def main(file)
 if __name__ == '__main__':
     main()
 
-
+else: print(" Apply clean() to the dataframe to return a cleaned version "
+            "\n e.g. df_clean = movie_cleaning.clean(df) ")
 ###
-
-cleaned_genres = []
-for index in range(len(df_mc['Genre'])):
-    list = df_mc['Genre'][index].split(sep=',')
-    row = []
-    for item in list:
-        new = item.replace(' ','')
-        row.append(new)
-    cleaned_genres.append(row)
-
-df_mc['Genre'] = cleaned_genres
