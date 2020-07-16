@@ -1,6 +1,7 @@
 import pandas
 from pytimeparse.timeparse import timeparse
 import dateutil.parser as dparser
+import re
 
 ratings_list = [' R ',
                ' M ',#this is now PG
@@ -35,9 +36,11 @@ class CL:
     def genres(self):
         cleaned_genres = []
         for genres in self['Genre']:
-            list = genres.split(sep=',')
+            list = re.split(r'[,&]', genres)
             row = []
             for item in list:
+                if item==' Suspense':
+                    continue
                 new = item.replace(' ', '')
                 row.append(new)
             cleaned_genres.append(row)
