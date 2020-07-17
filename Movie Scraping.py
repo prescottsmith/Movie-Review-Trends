@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import numpy as np
-from string import ascii_letters
 
 sns.set(style="white")
 
@@ -36,6 +35,7 @@ mc = df_mc_clean
 rt = df_rt_clean
 imdb = df_imdb_clean[0:100]
 
+
 ### widening the genres layout
 def genre_list(df):
     list = []
@@ -53,6 +53,7 @@ mc_genres = genre_list(mc)
 
 all_genres = sorted(list(set(imdb_genres+rt_genres+mc_genres)))
 
+#Creating full dataframe
 top100 = imdb.append(rt.append(mc))
 
 for genre in all_genres:
@@ -65,14 +66,11 @@ for genre in all_genres:
     top100[genre]=booler
 ###
 
+#Checking genres reformatted correctly
 for genre in all_genres:
     print(genre + ': ' + str(top100[genre].sum()))
 
 
-
-
-
-#Columns need units
 
 #Exploratory Data Analysis
 
@@ -87,10 +85,9 @@ plt.xticks(rotation=90)
 plt.show()
 
 
-#
+#Runtime distributions
 runtimes = megaframe.groupby(['Source'])['Runtime'].mean()
 
-#Runtime distributions
 fig, ax = plt.subplots()
 ax.hist(imdb['Runtime'], color='y', alpha=0.5, bins=20)
 ax.hist(rt['Runtime'], color='r', alpha=0.5, bins=20)
@@ -101,11 +98,8 @@ ax.set_title('Distribution of Runtimes')
 plt.show()
 
 
-sites = ['IMDB', 'Rotten Tomatoes', 'Metacritic']
+#sites = ['IMDB', 'Rotten Tomatoes', 'Metacritic']
 
-
-sns.barplot(data=megaframe.groupby(['Source'])['Runtime'].mean())
-plt.show()
 
 
 #Correlation plot
