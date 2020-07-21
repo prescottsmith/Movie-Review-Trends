@@ -1,6 +1,6 @@
-import imdb_collect
-import rt_collect
-import mc_collect
+from scraping import imdb_collect
+from scraping import rt_collect
+from scraping import mc_collect
 import movie_cleaning
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -9,9 +9,9 @@ import numpy as np
 
 sns.set(style="white")
 
-df_imdb = (pd.read_csv('imdb_chart.csv').copy())
-df_rt = (pd.read_csv('rt_chart.csv').copy())
-df_mc = (pd.read_csv('mc_chart.csv').copy())
+df_imdb = (pd.read_csv('Data/imdb_chart.csv').copy())
+df_rt = (pd.read_csv('Data/rt_chart.csv').copy())
+df_mc = (pd.read_csv('Data/mc_chart.csv').copy())
 
 #Scrape IMDB
 #df_imdb = imdb_collect.scrape()
@@ -86,12 +86,13 @@ plt.show()
 
 
 #Runtime distributions
-runtimes = megaframe.groupby(['Source'])['Runtime'].mean()
+runtimes = top100.groupby(['Source'])['Runtime'].mean()
 
 fig, ax = plt.subplots()
 ax.hist(imdb['Runtime'], color='y', alpha=0.5, bins=20)
 ax.hist(rt['Runtime'], color='r', alpha=0.5, bins=20)
 ax.hist(mc['Runtime'], color='b', alpha=0.5, bins=20)
+ax.legend(prop={'size': 10})
 ax.set_xlabel('Runtime (minutes)')
 ax.set_ylabel('Frequency')
 ax.set_title('Distribution of Runtimes')
