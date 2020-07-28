@@ -6,29 +6,29 @@ import numpy as np
 from plotnine import *
 
 wide_data = pd.read_csv('Data/imdb_final_wide.csv')
-
+all_genres = pd.read_csv('Data/all_genres.csv')
 ##### Genre graphing
 
 #Genres quantity
 decades = [1980, 1990, 2000, 2010]
 genre_values = []
-for genre in all_genres:
+for genre in all_genres['Genres']:
     genre_values.append(wide_data[genre].sum())
 
 g_av_ratings = []
-for genre in all_genres:
+for genre in all_genres['Genres']:
     frame = wide_data[wide_data[genre]==True]
     g_avg = frame['IMDB_Rating'].mean()
     g_av_ratings.append(g_avg)
 
 # Making Genre DF
-genres_dict={'Genre':all_genres, 'Quantity':genre_values, 'Avg_Rating':g_av_ratings}
+genres_dict={'Genre':all_genres['Genres'], 'Quantity':genre_values, 'Avg_Rating':g_av_ratings}
 
 genre_df=pd.DataFrame(genres_dict)
 
 # Genre histogram
 fig, ax = plt.subplots()
-plt.bar(all_genres, genre_values)
+plt.bar(all_genres['Genres'], genre_values)
 plt.xticks(rotation=90)
 plt.show()
 
@@ -58,5 +58,5 @@ plt.show()
 
 
 
-longest_movie = data[data['Runtime']==data['Runtime'].max()]
+longest_movie = wide_data[wide_data['Runtime']==wide_data['Runtime'].max()]
 print(longest_movie['Title'] + ' ' + str(longest_movie['Runtime']) + 'mins')

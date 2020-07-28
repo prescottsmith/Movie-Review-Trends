@@ -84,3 +84,8 @@ def genre_list(df):
 
 data_genres = genre_list(wide_data)
 all_genres = sorted(list(set(data_genres)))
+
+genres_dict = {'Genres':all_genres}
+genres_df = pd.DataFrame(genres_dict)
+
+genres_df.to_csv(r'Data/all_genres.csv')
