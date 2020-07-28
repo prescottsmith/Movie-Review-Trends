@@ -34,6 +34,7 @@ class IMDB:
             imdb.append(imdb_data)
         return imdb
 
+
     def movies_soup(self):
         imdb_links = []
         for movie in self:
