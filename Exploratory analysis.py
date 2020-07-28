@@ -41,7 +41,7 @@ plt.show()
 
 # Decade averages - doesnt work
 fig, ax = plt.subplots()
-graph = sns.barplot(data=wide_data, x='Decade', y=data['IMDB_Rating'].mean())
+graph = sns.barplot(data=wide_data, x='Decade', y=wide_data['IMDB_Rating'].mean())
 graph.set_xticklabels(ax.get_xticklabels(), rotation=65)
 plt.show()
 
