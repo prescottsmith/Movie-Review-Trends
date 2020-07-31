@@ -32,6 +32,7 @@ class CL:
         self = self.replace(' TV-PG ', ' PG ')
         self = self.replace(' TV-14 ', ' PG-13 ') #Closest approximation
         self = self.replace(' NR ', ' Not Rated ')
+        self = self.replace('Unrated', 'Not Rated')
         return self
 
     def genres(self):
