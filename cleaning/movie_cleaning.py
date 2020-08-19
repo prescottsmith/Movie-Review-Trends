@@ -3,6 +3,7 @@ from pytimeparse.timeparse import timeparse
 import dateutil.parser as dparser
 import re
 import numpy as np
+import math
 
 ratings_list = [' R ',
                ' M ',#this is now PG
@@ -87,17 +88,26 @@ class CL:
 
 
     def release(self):
-        cleaned_release = []
-        for row in self['Release_Date']:
-            row = row.replace('Release Date: ', '').split('\n')
-            try:
-                row = row[1].split('(')[0].strip()
-                date = dparser.parse(row, fuzzy=True).date()
-                cleaned_release.append(date)
-            except:
-                cleaned_release.append(np.NaN)
-        self['Release_Date'] = cleaned_release
-        return self
+        if 'Release_Date' in self.columns:
+            cleaned_release = []
+            for row in self['Release_Date']:
+                if isinstance(row, float):
+                    cleaned_release.append(row)
+                else:
+                    if 'Release' in row:
+                        row = row.replace('Release Date: ', '').split('\n')
+                        try:
+                            row = row[1].split('(')[0].strip()
+                            date = dparser.parse(row, fuzzy=True).date()
+                            cleaned_release.append(date)
+                        except:
+                            cleaned_release.append(np.NaN)
+                    else:
+                        cleaned_release.append(row)
+            self['Release_Date'] = cleaned_release
+            return self
+        else:
+            return self
 
     def vote_cleaned(self):
         cleaned_votes = []
@@ -113,28 +123,40 @@ class CL:
         return self
 
     def country_cleaned(self):
-        country = []
-        for row in self['Country']:
-            row = row.replace('\nCountry:', '')
-            row = row.replace('\n|', '').split('\n')
-            try:
-                country.append(row[1:-1])
-            except:
-                country.append(row)
-        self['Country'] = country
-        return self
+        if 'Country' in self.columns:
+            country = []
+            for row in self['Country']:
+                if 'Country' in row:
+                    row = row.replace('\nCountry:', '')
+                    row = row.replace('\n|', '').split('\n')
+                    try:
+                        country.append(row[1:-1])
+                    except:
+                        country.append(row)
+                else:
+                    country.append(row)
+            self['Country'] = country
+            return self
+        else:
+            return self
 
     def lang_cleaned(self):
-        lang = []
-        for row in self['Language']:
-            row1 = row.replace('\nLanguage:', '')
-            row1 = row1.replace('\n|', '').split('\n')
-            if row != ' ~data not found~ ':
-                lang.append(row1[1:-1])
-            else:
-                lang.append(row)
-        self['Language'] = lang
-        return self
+        if 'Language' in self.columns:
+            lang = []
+            for row in self['Language']:
+                if 'Language' in row:
+                    row1 = row.replace('\nLanguage:', '')
+                    row1 = row1.replace('\n|', '').split('\n')
+                    if row != ' ~data not found~ ':
+                        lang.append(row1[0])
+                    else:
+                        lang.append(row)
+                else:
+                    lang.append(row)
+            self['Language'] = lang
+            return self
+        else:
+            return self
 
 
 

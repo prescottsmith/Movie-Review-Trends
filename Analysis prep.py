@@ -1,29 +1,70 @@
 from cleaning import movie_cleaning
 import pandas as pd
 import numpy as np
+import math
 
 
 #imdb = pd.read_csv('Data/imdb_full_raw.csv', encoding = "ISO-8859-1").copy()
 #imdb_clean = movie_cleaning.clean(imdb_filtered.copy())
 #base_df.replace(' ~data not found~ ', np.NaN)
 
-imdb_base = pd.read_csv('Data/imdb_trimmed.csv', encoding = "ISO-8859-1").copy()
-imdb_details = pd.read_csv('Data/imdb_details_raw.csv', encoding = "ISO-8859-1").copy()
-imdb_full_raw = imdb_base.join(imdb_details)
-imdb_full_clean = movie_cleaning.clean(imdb_full_raw.drop(columns='Title (w/ year)'))
-imdb_full_clean = imdb_full_clean.replace(' ~data not found~ ', np.NaN)
-imdb_full_clean = imdb_full_clean.replace('~data not found~', np.NaN)
+#imdb_base = pd.read_csv('Data/imdb_giant_trimmed.csv', encoding = "ISO-8859-1").copy()
+#imdb_details = pd.read_csv('Data/imdb_giant_details_raw.csv', encoding = "ISO-8859-1").copy()
+#imdb_full_raw = imdb_base.join(imdb_details)
+full_raw = pd.read_csv('Data/movies_complete_raw.csv', encoding = "ISO-8859-1").copy()
+full_clean = movie_cleaning.clean(full_raw.drop(columns=['Title (w/ year)','Title_(RT)','Source']))
+#full_clean = full_clean.replace(' ~data not found~ ', np.NaN)
+#full_clean = full_clean.replace('~data not found~', np.NaN)
+full_clean = full_clean.replace(' ~data not found~ ', 'data unavailable')
+full_clean = full_clean.replace('~data not found~', 'data unavailable')
+full_clean = full_clean[full_clean['Year']!=2020].reset_index()
+
+
+new_country=[]
+for country in full_clean['Country']:
+    if country != 'data unavailable':
+        country = country.split(',')[0]
+        country = country[2:-1]
+        country = country.replace("'", "")
+        new_country.append(country)
+    else:
+        new_country.append(country)
+full_clean["Country"] = new_country
+
+
 
 new_meta = []
-for row in imdb_full_clean['Metascore (*)']:
-    row = float(row)
-    new_meta.append(row)
-imdb_full_clean['Metascore (*)'] = new_meta
+for row in full_clean['Metascore (*)']:
+    if row == 'data unavailable':
+        row = np.NaN
+        new_meta.append(row)
+    else:
+        row = float(row)
+        new_meta.append(row)
+full_clean['Metascore (*)'] = new_meta
 
-imdb_full_clean['Metascore (*)'] = imdb_full_clean['Metascore (*)']/10
-imdb_full_clean.to_csv(r'Data/imdb_final.csv')
+full_clean['IMDB_Rating'] = full_clean['IMDB_Rating']*10
 
-data = imdb_full_clean.copy()
+
+RT_data = []
+for row in range(len(full_clean)):
+        if math.isnan(full_clean['RT_critic'][row]):
+            if math.isnan(full_clean['RT_audience'][row]):
+                RT_data.append(0)
+            else:
+                RT_data.append(1)
+        else:
+            RT_data.append(1)
+RT_dict = {'RT_Data':RT_data}
+RT_data = pd.DataFrame(RT_dict)
+full_clean = full_clean.join(RT_data)
+
+full_clean = full_clean[full_clean['RT_Data']==1].drop(columns=['RT_Data'])
+full_clean = full_clean[pd.notna(full_clean['Metascore (*)'])]
+full_clean = full_clean.reset_index(drop=True)
+full_clean.to_csv(r'Data/movies_final.csv')
+
+data = full_clean.copy()
 
 
 decade=[]
@@ -51,6 +92,7 @@ for genres in data['Genre']:
     genres = genres.replace(" ", '')
     genres = genres.replace("-", '_')
     genres = genres.split(',')
+
     new_genres.append(genres)
 data['Genre']=new_genres
 
@@ -64,11 +106,54 @@ def genre_list(df):
             list.append(items)
     return list
 
-wide_data = data.copy()
-data_genres = genre_list(data)
+def country_list(df):
+    list = []
+    for index in range(len(df)):
+        country = df['Country'][index]
+        if country in list:
+            continue
+        list.append(country)
+    return list
 
+def lang_list(df):
+    list = []
+    for index in range(len(df)):
+        language = df['Language'][index]
+        if language in list:
+            continue
+        list.append(language)
+    return list
+
+data_genres = genre_list(data)
+data_countries = country_list(data)
+data_languages = lang_list(data)
 
 all_genres = sorted(list(set(data_genres)))
+
+all_countries = sorted(list(set(data_countries)))
+all_languages = sorted(list(set(data_languages)))
+
+wide_data = data.copy()
+
+booler = []
+for movie in wide_data['Language']:
+    if movie != 'English':
+        booler.append(True)
+    else:
+        booler.append(False)
+wide_data['Foreign Language']=booler
+
+booler = []
+for movie in wide_data['Country']:
+    if movie == 'USA':
+        booler.append(False)
+    elif movie == 'UK':
+        booler.append(False)
+    else:
+        booler.append(True)
+
+wide_data['Foreign Production']=booler
+
 
 for genre in all_genres:
     booler = []
@@ -79,21 +164,40 @@ for genre in all_genres:
             booler.append(False)
     wide_data[genre]=booler
 
-wide_data.to_csv('Data/imdb_final_wide.csv', index = False)
+new_genre=[]
+for g in full_clean['Genre']:
+    if g != 'data unavailable':
+        g = g.split(',')[0]
+        g = g[2:-1]
+        g = g.replace("'", "")
+        new_genre.append(g)
+    else:
+        new_genre.append(g)
+full_clean["Genre"] = new_genre
 
-def genre_list(df):
-    list = []
-    for index in range(len(df)):
-        genres = df['Genre'][index]
-        for items in genres:
-            if items in list:
-                continue
-            list.append(items)
-    return list
 
-data_genres = genre_list(wide_data)
-all_genres = sorted(list(set(data_genres)))
+for country in all_countries:
+    booler = []
+    for movie in wide_data['Country']:
+        if country in movie:
+            booler.append(True)
+        else:
+            booler.append(False)
+    wide_data[country]=booler
 
+prim_g = []
+for movie in wide_data['Genre']:
+        primary = movie[0]
+        prim_g.append(primary)
+wide_data ['Primary_Genre'] = prim_g
+
+wide_data = wide_data[wide_data['Film_Noir']==False].drop(columns=['Film_Noir'])
+
+wide_data = wide_data.rename(columns={'Metascore (*)':'Metascore'})
+wide_data.to_csv('Data/movies_final_wide.csv', index = False)
+
+
+all_genres.remove('Film_Noir')
 
 genres_dict = {'Genres':all_genres}
 genres_df = pd.DataFrame(genres_dict)
@@ -176,43 +280,52 @@ for genre in all_genres:
     time_genre.update({genre:vals})
 
 time_genre['Western']= np.append(time_genre['Western'], 0)
-genre_time_df = pd.DataFrame(time_genre)
-genre_time_df.to_csv('Data/Analysis_Data/Genre_Decades_IMDB.csv', index=False)
-
-time_genre = {'Decade':(1980,1990,2000,2010,2020)}
-for genre in all_genres:
-    series = wide_data[wide_data[genre]==True].groupby('Decade')['Metascore (*)'].mean()
-    vals = series.values
-    time_genre.update({genre:vals})
-
-time_genre['Western']= np.append(time_genre['Western'], 0)
-genre_time_df_meta = pd.DataFrame(time_genre)
-genre_time_df_meta.to_csv('Data/Analysis_Data/Genre_Decades_Metascore.csv', index=False)
+#genre_time_df = pd.DataFrame(time_genre)
+#genre_time_df.to_csv('Data/Analysis_Data/Genre_Decades_Movies.csv', index=False)
 
 
-
-
-genre_percentages_decade = {'Decade':(1980,1990,2000,2010,2020)}
+genre_percentages_decade = {'Decade':(1950, 1960, 1970, 1980,1990,2000,2010)}
 for genre in all_genres:
     series = wide_data[wide_data[genre]==True].groupby('Decade')['Title'].count()/wide_data.groupby('Decade')['Title'].count()
     vals = series.values
     genre_percentages_decade.update({genre:vals})
+
 genre_percentages_decade = pd.DataFrame(genre_percentages_decade)
 genre_percentages_decade.to_csv('Data/Analysis_Data/Genre_Percentages_Decade.csv', index=False)
 
 
 
 
+IMDB = wide_data[['Title','IMDB_Rating','Genre', 'Runtime', 'MPAA/TV_Rating', 'Release_Date','Month', 'Year', 'Decade', 'Primary_Genre']].copy()
+Metascore = wide_data[['Title','Metascore','Genre', 'Runtime', 'MPAA/TV_Rating', 'Release_Date','Month', 'Year', 'Decade', 'Primary_Genre']].copy()
+RT_Critic = wide_data[['Title','RT_critic','Genre', 'Runtime', 'MPAA/TV_Rating', 'Release_Date','Month', 'Year', 'Decade', 'Primary_Genre']].copy()
+RT_Audience = wide_data[['Title','RT_audience','Genre', 'Runtime', 'MPAA/TV_Rating', 'Release_Date','Month', 'Year', 'Decade', 'Primary_Genre']].copy()
+
+IMDB['Source'] = 'IMDB'
+Metascore['Source'] = 'Metascore'
+RT_Critic['Source'] = 'RT Critics'
+RT_Audience['Source'] = 'RT Audience'
 
 
-#This won't work because of mismatched lengths (some years might not have a genre represented)
-genre_percentages_year = {'Year':(range(1980,2020))}
-for genre in all_genres:
-    series = wide_data[wide_data[genre]==True].groupby('Year')['Title'].count()/wide_data.groupby('Year')['Title'].count()
-    vals = series.values
-    genre_percentages_year.update({genre:vals})
-genre_percentages_year = pd.DataFrame(genre_percentages_year)
-genre_percentages_year.to_csv('Data/Analysis_Data/Genre_Percentages_Year.csv', index=False)
+IMDB = IMDB.rename(columns = {'IMDB_Rating':'Rating'})
+Metascore = Metascore.rename(columns = {'Metascore':'Rating'})
+RT_Critic = RT_Critic.rename(columns = {'RT_critic':'Rating'})
+RT_Audience = RT_Audience.rename(columns = {'RT_audience':'Rating'})
+
+
+source_list = [IMDB, Metascore, RT_Critic, RT_Audience]
+
+
+comparison_data = IMDB.append(Metascore.append(RT_Critic.append(RT_Audience)))
+
+comparison_data = comparison_data[~np.isnan(comparison_data['Rating'])].reset_index(drop=True)
+
+critics_data = Metascore.append(RT_Critic)
+audience_data = IMDB.append(RT_Audience)
+
+comparison_data.to_csv('Data/Analysis_Data/movies_comparison_wide.csv', index = False)
+critics_data.to_csv('Data/Analysis_Data/movies_critics_wide.csv', index = False)
+audience_data.to_csv('Data/Analysis_Data/movies_audience_wide.csv', index = False)
 
 
 

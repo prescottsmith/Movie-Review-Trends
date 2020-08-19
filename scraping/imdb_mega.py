@@ -7,8 +7,8 @@ import numpy as np
 
 
 base_url = 'https://www.imdb.com'
-search_url = '/search/title/?title_type=feature&release_date=1980-01-01,2020-01-01&sort=release_date,desc&count=250'
-cut_url = '/search/title/?title_type=feature&release_date=1980-01-01,2020-01-01&sort=release_date,desc&count=250&start=10001&ref_=adv_nxt'
+search_url = '/search/title/?title_type=feature&release_date=1950-01-01,2020-07-31&sort=release_date,desc&count=250'
+cut_url = '/search/title/?title_type=feature&release_date=1950-01-01,2019-12-31&sort=release_date,desc&count=250&start=10001&ref_=adv_nxt'
 start_url = base_url + search_url
 end_url = base_url + cut_url
 
@@ -122,7 +122,7 @@ class IMDBcrawler:
 
     def save_items(self):
         dataframe = pd.DataFrame(self.mega_list)
-        dataframe.to_csv(r'imdb_raw.csv', index=False, header=True)
+        dataframe.to_csv(r'Data/imdb_giant_raw.csv', index=False, header=True)
         self.mega_list = []
 
 

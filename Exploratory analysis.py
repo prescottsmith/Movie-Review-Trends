@@ -5,12 +5,13 @@ import numpy as np
 
 sns.set_style("whitegrid")
 
-wide_data = pd.read_csv('Data/imdb_final_wide.csv', index_col=False)
+wide_data = pd.read_csv('Data/movies_final_wide.csv', index_col=False)
 all_genres = pd.read_csv('Data/all_genres.csv', index_col=False)
 all_genres = all_genres['Genres'].tolist()
 genre_decades = pd.read_csv('Data/Analysis_Data/Genre_Decades.csv')
 genre_decades_meta = pd.read_csv('Data/Analysis_Data/Genre_Decades_Metascore.csv')
-
+comparison_data = pd.read_csv('Data/Analysis_Data/movies_comparison_wide.csv')
+comparison_data = comparison_data[comparison_data['Decade']!=2020]
 #wide_data = wide_data[wide_data['Number_of_votes']>5000]
 
 # Total quantities
@@ -65,6 +66,7 @@ for genre in all_genres: #this works though
     sns.boxplot(x='Decade', y='IMDB_Rating', data=df)
     ax.set_title(genre)
     plt.show()
+
 
 
 decade_genre_changes_box(genre_decades, y_label='Avg IMDB Rating')
@@ -241,3 +243,124 @@ plt.show()
 
 longest_movie = wide_data[wide_data['Runtime']==wide_data['Runtime'].max()]
 print(longest_movie['Title'] + ' ' + str(longest_movie['Runtime']) + 'mins')
+
+
+
+#Correlation plot
+new_data = wide_data[wide_data['Number_of_votes']>10000]
+corr_data = new_data.drop(['Title', 'URL', 'Genre', 'MPAA/TV_Rating', 'Release_Date', 'Month', 'Language', 'Decade', 'Country'], axis =1)
+
+correlation = corr_data.corr()
+
+
+# Set up the matplotlib figure
+f, ax = plt.subplots(figsize=(100, 90))
+
+# Generate a custom diverging colormap
+#cmap = sns.diverging_palette(220, 10, as_cmap=True)
+
+# Draw the heatmap with the mask and correct aspect ratio
+sns.heatmap(correlation, square=True, annot=True, linewidths=.5, cbar_kws={"shrink": .5})
+
+plt.show()
+
+
+
+#Comparing the websites
+
+#website ratings
+fig, ax = plt.subplots()
+sns.boxplot(x='Source', y='Rating', data=comparison_data)
+plt.show()
+
+#website ratings over time
+fig, ax = plt.subplots()
+sns.boxplot(x='Source', y='Rating', data=comparison_data, hue='Decade')
+plt.show()
+
+#genre ratings
+for genre in all_genres: #this works though
+    df = comparison_data[comparison_data[genre]==True]
+    fig, ax = plt.subplots()
+    sns.boxplot(x='Source', y='Rating', data=df)
+    ax.set_title(genre)
+    plt.show()
+
+#genre ratings over time
+for genre in all_genres: #this works though
+    df = comparison_data[comparison_data[genre]==True]
+    fig, ax = plt.subplots()
+    sns.boxplot(x='Source', y='Rating', data=df, hue='Decade')
+    ax.set_title(genre)
+    plt.show()
+
+#Runtime ratings
+
+fig, ax = plt.subplots()
+sns.scatterplot(x='Runtime', y='Rating', data=comparison_data, hue='Source')
+plt.show()
+
+fig, ax = plt.subplots()
+sns.barplot(x='MPAA/TV_Rating', y='Rating', data=comparison_data, hue='Source')
+ax.set_xticklabels(ax.get_xticklabels(), rotation=65)
+plt.show()
+
+fig, ax = plt.subplots()
+sns.barplot(x='Decade', y='Rating', data=comparison_data, hue='Source')
+ax.set_xticklabels(ax.get_xticklabels(), rotation=65)
+plt.show()
+
+fig, ax = plt.subplots()
+sns.boxplot(x='Source', y='Rating', data=comparison_data)
+plt.savefig('Graphs/Overall/Ratings/ratings_per_site.png', bbox_inches = "tight")
+plt.show()
+
+fig, ax = plt.subplots()
+sns.lineplot(x='Year', y='Rating', data=comparison_data, hue='Source')
+plt.savefig('Graphs/Over_Time/Ratings/yearly_ratings_per_site.png', bbox_inches = "tight")
+plt.show()
+
+fig, ax = plt.subplots()
+sns.lineplot(x='Decade', y='Rating', data=comparison_data, hue='Source')
+plt.savefig('Graphs/Over_Time/Ratings/decade_ratings_per_site.png', bbox_inches = "tight")
+plt.show()
+
+
+#primary genre ratings over time
+for genre in all_genres:
+    path = str('Graphs/Over_Time/Ratings/Primary_Genres/decade_ratings_per_site_' + str(genre) + '.png')
+    fig, ax = plt.subplots()
+    sns.lineplot(x='Decade', y='Rating', data=comparison_data[comparison_data['Primary_Genre']==genre], hue='Source')
+    ax.set_title(str('Primarily ' + genre + ' Movies - Ratings over time'))
+    plt.savefig(path, bbox_inches="tight")
+    plt.show()
+
+
+for genre in all_genres:
+    booler = []
+    for movie in comparison_data['Genre']:
+        if genre in movie:
+            booler.append(True)
+        else:
+            booler.append(False)
+    comparison_data[genre]=booler
+
+#all genre ratings over time
+for genre in all_genres:
+    path = str('Graphs/Over_Time/Ratings/All_Genre_Tags/decade_ratings_per_site_' + genre + '.png')
+    fig, ax = plt.subplots()
+    sns.lineplot(x='Decade', y='Rating', data=comparison_data[comparison_data[genre]==1], hue='Source')
+    ax.set_title(str('Tagged ' +genre + ' Movies - Ratings over time'))
+    plt.savefig(path, bbox_inches="tight")
+    plt.show()
+
+
+for genre in all_genres:
+    path = str('Graphs/Over_Time/Ratings/Primary_Genres/decade_ratings_per_site_' + str(genre) + '.png')
+    fig, ax = plt.subplots(1,2, sharey=True, figsize=(16,7))
+    sns.lineplot(x='Decade', y='Rating', data=comparison_data[comparison_data['Primary_Genre']==genre], hue='Source', ax=ax[0])
+    sns.lineplot(x='Decade', y='Rating', data=comparison_data[comparison_data[genre] == 1], hue='Source', ax=ax[1])
+    ax[0].set_title(str('Primarily ' + genre + ' Movies - Ratings over time'))
+    ax[1].set_title(str('Tagged ' + genre + ' Movies - Ratings over time'))
+    #plt.savefig(path, bbox_inches="tight")
+    plt.show()

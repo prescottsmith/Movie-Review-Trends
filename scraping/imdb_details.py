@@ -3,12 +3,12 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from cleaning import movie_cleaning
 
-raw_df = pd.read_csv('Data/imdb_raw.csv', encoding = "ISO-8859-1").copy()
+raw_df = pd.read_csv('Data/imdb_giant_raw.csv', encoding = "ISO-8859-1").copy()
 base_df = raw_df[raw_df['IMDB_Rating']!=' ~data not found~ ']
 base_df = movie_cleaning.clean(base_df.copy())
 base_df = base_df[base_df['Number_of_votes']>1000]
 base_df = base_df.reset_index(drop=True)
-base_df.to_csv(r'Data/imdb_trimmed.csv', index=False, header=True)
+base_df.to_csv(r'Data/imdb_giant_trimmed.csv', index=False, header=True)
 country = []
 lang = []
 rdate = []
@@ -21,11 +21,11 @@ class IMDBdetails:
         rdate = []
 
     def prep():
-        raw_df = pd.read_csv('Data/imdb_raw.csv', encoding="ISO-8859-1").copy()
+        raw_df = pd.read_csv('Data/imdb_giant_raw.csv', encoding="ISO-8859-1").copy()
         base_df = raw_df[raw_df['IMDB_Rating'] != ' ~data not found~ ']
         base_df = movie_cleaning.clean(base_df.copy())
         base_df = base_df[base_df['Number_of_votes'] > 1000]
-        base_df.to_csv(r'Data/imdb_trimmed.csv', index=False, header=True)
+        base_df.to_csv(r'Data/imdb_giant_trimmed.csv', index=False, header=True)
         base_df = base_df.reset_index(drop=True)
         return base_df
 
@@ -81,12 +81,12 @@ class IMDBdetails:
             IMDBdetails.save_items(details)
             a = a+1
             print('Movie details added: ' + str(a))
-        #details = pd.DataFrame(details)
+        details = pd.DataFrame(details)
         full_frame = self.join(details)
         return full_frame
 
 
-    def save_items(self, path=r'Data/imdb_details_raw.csv'):
+    def save_items(self, path=r'Data/imdb_giant_details_raw.csv'):
         dataframe = pd.DataFrame(self)
         dataframe.to_csv(path, index=False, header=True)
 
