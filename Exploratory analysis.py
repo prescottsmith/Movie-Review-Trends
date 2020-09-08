@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import math
 import numpy as np
 
 sns.set_style("whitegrid")
@@ -351,7 +352,8 @@ for genre in all_genres:
     fig, ax = plt.subplots()
     sns.lineplot(x='Decade', y='Rating', data=comparison_data[comparison_data[genre]==1], hue='Source')
     ax.set_title(str('Tagged ' +genre + ' Movies - Ratings over time'))
-    plt.savefig(path, bbox_inches="tight")
+    ax.set_ylim([0, 100])
+    #plt.savefig(path, bbox_inches="tight")
     plt.show()
 
 
@@ -362,5 +364,196 @@ for genre in all_genres:
     sns.lineplot(x='Decade', y='Rating', data=comparison_data[comparison_data[genre] == 1], hue='Source', ax=ax[1])
     ax[0].set_title(str('Primarily ' + genre + ' Movies - Ratings over time'))
     ax[1].set_title(str('Tagged ' + genre + ' Movies - Ratings over time'))
+    ax[0].set_ylim([0, 100])
+    ax[1].set_ylim([0, 100])
     #plt.savefig(path, bbox_inches="tight")
+    plt.show()
+
+
+
+fig, ax = plt.subplots()
+sns.barplot(x='Month', y='Rating', data=comparison_data[comparison_data['Source']=='RT Critics'], ci=False)
+ax.set_ylim([50, 70])
+ax.set_title('RT Critics - Average Monthly Ratings')
+plt.show()
+
+fig, ax = plt.subplots()
+sns.barplot(x='Month', y='Rating', data=comparison_data[comparison_data['Source']=='Metascore'], ci=False)
+ax.set_ylim([50, 70])
+ax.set_title('Metacritic - Average Monthly Ratings')
+plt.show()
+
+fig, ax = plt.subplots()
+sns.barplot(x='Month', y='Rating', data=comparison_data[comparison_data['Source']=='IMDB'], ci=False)
+ax.set_ylim([50, 70])
+ax.set_title('IMDB - Average Monthly Ratings')
+plt.show()
+
+fig, ax = plt.subplots()
+sns.barplot(x='Month', y='Rating', data=comparison_data[comparison_data['Source']=='RT Audience'], ci=False)
+ax.set_ylim([50, 70])
+ax.set_title('RT Audience - Average Monthly Ratings')
+plt.show()
+
+fig, ax = plt.subplots()
+sns.countplot(x='Month', data=wide_data)
+ax.set_title('Monthly release quantities')
+plt.show()
+
+fig, ax = plt.subplots()
+sns.countplot(x='Month', data=wide_data[wide_data['Year']>=2000])
+ax.set_title('Monthly release quantities - last 20 years')
+plt.show()
+
+
+
+for genre in all_genres:
+    data = wide_data[wide_data[genre]==True]
+    fig, ax = plt.subplots()
+    sns.barplot(x='Month', y='RT_critic', data=data[data['Year']>=2000], ci=False)
+    ax.set_ylim([0, 100])
+    ax.set_ylabel('Rating')
+    ax.set_title('RT Critics - Average Monthly ' + str(genre) + ' Ratings')
+    plt.savefig('Graphs/Over_Time/Ratings/Monthly/Genres/RT_critic_monthly_ratings_' + str(genre) + '.png', bbox_inches = "tight")
+    plt.show()
+
+for genre in all_genres:
+    data = wide_data[wide_data[genre]==True]
+    fig, ax = plt.subplots()
+    sns.countplot(x='Month', data=data[data['Year']>=2000])
+    ax.set_title('Quantity of ' + str(genre) + ' Genre releases per month since 2000')
+    #plt.savefig('Graphs/Over_Time/Ratings/Monthly/RT_critic_monthly_ratings.png', bbox_inches = "tight")
+    plt.show()
+
+#just RT critic 10 year country ratings
+country_list = ['USA', 'UK', 'France', 'Canada', 'Germany', 'Australia', 'Japan', 'Spain', 'China']
+for country in country_list:
+    fig, ax = plt.subplots(figsize=(20,9))
+    ax.set_ylim([0, 100])
+    country_data = wide_data[wide_data['Country']==country]
+    sns.barplot(x='Year', y='RT_critic', data=country_data[country_data['Year']>2009])
+    ax.set_title(str(country) + ' movie ratings last 5 years')
+    ax.set_ylabel('Average RT Critic Rating')
+    ax.set_xlabel('Year')
+
+    #plt.savefig('Graphs/Overall/Ratings/top10_country_Ratings_meta.png', bbox_inches = "tight")
+    plt.show()
+
+
+#switch to show different website ratings
+country_list = ['USA', 'UK', 'France', 'Canada', 'Germany', 'Australia', 'Japan', 'Spain', 'China']
+for country in country_list:
+    fig, ax = plt.subplots(figsize=(20,9))
+    ax.set_ylim([0, 100])
+    country_data = comparison_data[comparison_data['Country']==country]
+    sns.barplot(x='Year', y='Rating', data=country_data[country_data['Year']>2009], hue='Source')
+    ax.set_title(str(country) + ' movie ratings last 10 years')
+    ax.set_ylabel('Average RT Critic Rating')
+    ax.set_xlabel('Year')
+    #plt.savefig('Graphs/Overall/Ratings/top10_country_Ratings_meta.png', bbox_inches = "tight")
+    plt.show()
+
+
+fig, ax = plt.subplots(figsize=(20,9))
+sns.barplot(x='Country', y='Rating', data=comparison_data[comparison_data['Year']>2009], hue='Source', order = comparison_data.Country.value_counts().iloc[:10].index)
+ax.set_title('Top 10 movie-producing countries - Average ratings (last decade)', fontsize=23)
+ax.set_ylabel('Average Movie Rating', fontsize=20)
+ax.set_xlabel('Country', fontsize=20)
+ax.tick_params(labelsize=18)
+ax.legend(fontsize='x-large', title_fontsize='40')
+plt.savefig('Graphs/Overall/Ratings/top10_country_Ratings.png', bbox_inches = "tight")
+plt.show()
+
+
+#Runtime ratings last 20 years
+wide_data['Runtime_rounded']=round(wide_data['Runtime']/5)*5
+
+
+
+fig, ax = plt.subplots()
+sns.barplot(x='Runtime_rounded', y='RT_critic', data=wide_data[wide_data['Year']>=2000])
+ax.set_ylim([0, 100])
+ax.set_ylabel('RT Critic Rating', fontsize=12)
+ax.set_xlabel('Rounded Runtimes (nearest 5 minutes)', fontsize=12)
+ax.tick_params(labelsize=10, rotation=90)
+ax.set_title("Runtimes - Average Ratings from RT Critics (last 20 years)", fontsize=14)
+#plt.savefig('Graphs/Overall/Ratings/Runtime_ratings_20_year_RT_critics.png', bbox_inches = "tight")
+plt.show()
+
+#Runtime ratings across genres
+last20 = wide_data[wide_data['Year']>=2000]
+
+for genre in all_genres:
+    fig, ax = plt.subplots()
+    sns.barplot(x='Runtime_rounded', y='RT_critic', data=last20[last20[genre]==True])
+    ax.set_ylim([0, 100])
+    ax.set_ylabel('RT Critic Rating', fontsize=12)
+    ax.set_xlabel('Rounded Runtimes (nearest 5 minutes)', fontsize=12)
+    ax.tick_params(labelsize=10, rotation=90)
+    ax.set_title("'"+ str(genre) + "' Runtimes - Average Ratings from RT Critics (last 20 years)", fontsize=14)
+    plt.savefig('Graphs/Overall/Ratings/Genres/Runtimes/' + str(genre) + '_ratings_20_year_RT_critics.png', bbox_inches = "tight")
+    plt.show()
+
+#Monthly runtime ratings
+months = [1,2,3,4,5,6,7,8,9,10,11,12]
+for month in months:
+    fig, ax = plt.subplots()
+    sns.barplot(x='Runtime_rounded', y='RT_critic', data=last20[last20['Month']==month])
+    ax.set_ylim([0, 100])
+    ax.set_ylabel('RT Critic Rating', fontsize=12)
+    ax.set_xlabel('Rounded Runtimes (nearest 5 minutes)', fontsize=12)
+    ax.tick_params(labelsize=10, rotation=90)
+    ax.set_title(str(month) + "st month Runtime Average Ratings from RT Critics (last 20 years)", fontsize=14)
+    #plt.savefig('Graphs/Overall/Ratings/Genres/Runtimes/' + str(genre) + '_ratings_20_year_RT_critics.png', bbox_inches = "tight")
+    plt.show()
+
+#maturity ratings
+fig, ax = plt.subplots()
+sns.barplot(x='MPAA/TV_Rating', y='Rating', data=comparison_data[comparison_data['Year']>=2000], hue='Source')
+ax.set_ylim([0, 100])
+ax.set_ylabel('Rating', fontsize=12)
+ax.set_xlabel('Maturity Rating', fontsize=12)
+ax.tick_params(labelsize=10, rotation=90)
+ax.set_title("Average Reviews for different maturity ratings (last 20 years)", fontsize=14)
+plt.savefig('Graphs/Overall/Ratings/reviews_maturity_ratings_20year.png', bbox_inches = "tight")
+plt.show()
+
+#maturity ratings monthly
+maturities = ['Not Rated', 'PG-13', 'R', 'PG', 'G', 'TV-14', 'TV-PG']
+
+for rating in maturities:
+    data = wide_data[wide_data['MPAA/TV_Rating']==rating]
+    fig, ax = plt.subplots()
+    sns.barplot(x='Month', y='RT_critic', data=data[data['Year']>=2000])
+    ax.set_ylim([0, 100])
+    ax.set_ylabel('Rating', fontsize=11)
+    ax.set_ylabel('Month', fontsize=11)
+    ax.tick_params(labelsize=10)
+    ax.set_title("'" + str(rating) + "' rated movies - Average monthly RT critic reviews (last 20 years)", fontsize=13)
+    plt.savefig('Graphs/Overall/Ratings/Monthly/Maturities/RT_critic_monthly_ratings_' + str(rating) + '_movies.png', bbox_inches = "tight")
+    plt.show()
+
+#Monthly maturity ratings
+months = [1,2,3,4,5,6,7,8,9,10,11,12]
+for month in months:
+    fig, ax = plt.subplots()
+    sns.barplot(x='Runtime_rounded', y='RT_critic', data=last20[last20['Month']==month])
+    ax.set_ylim([0, 100])
+    ax.set_ylabel('RT Critic Rating', fontsize=12)
+    ax.set_xlabel('Rounded Runtimes (nearest 5 minutes)', fontsize=12)
+    ax.tick_params(labelsize=10, rotation=90)
+    ax.set_title(str(month) + "st month Runtime Average Ratings from RT Critics (last 20 years)", fontsize=14)
+    #plt.savefig('Graphs/Overall/Ratings/Genres/Runtimes/' + str(genre) + '_ratings_20_year_RT_critics.png', bbox_inches = "tight")
+    plt.show()
+
+
+for genre in all_genres:
+    fig, ax = plt.subplots()
+    sns.barplot(x='MPAA/TV_Rating', y='RT_critic', data=last20[last20[genre]==True])
+    ax.set_ylim([0, 100])
+    ax.set_ylabel('RT Critic Rating', fontsize=12)
+    ax.set_xlabel('Maturity Rating', fontsize=12)
+    ax.tick_params(labelsize=10, rotation=90)
+    ax.set_title("'"+ str(genre) + "' movies' maturities - Average RT Critic Ratings (last 20 years)", fontsize=14)
+    #plt.savefig('Graphs/Overall/Ratings/Genres/Runtimes/' + str(genre) + '_ratings_20_year_RT_critics.png', bbox_inches = "tight")
     plt.show()

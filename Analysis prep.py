@@ -296,10 +296,10 @@ genre_percentages_decade.to_csv('Data/Analysis_Data/Genre_Percentages_Decade.csv
 
 
 
-IMDB = wide_data[['Title','IMDB_Rating','Genre', 'Runtime', 'MPAA/TV_Rating', 'Release_Date','Month', 'Year', 'Decade', 'Primary_Genre']].copy()
-Metascore = wide_data[['Title','Metascore','Genre', 'Runtime', 'MPAA/TV_Rating', 'Release_Date','Month', 'Year', 'Decade', 'Primary_Genre']].copy()
-RT_Critic = wide_data[['Title','RT_critic','Genre', 'Runtime', 'MPAA/TV_Rating', 'Release_Date','Month', 'Year', 'Decade', 'Primary_Genre']].copy()
-RT_Audience = wide_data[['Title','RT_audience','Genre', 'Runtime', 'MPAA/TV_Rating', 'Release_Date','Month', 'Year', 'Decade', 'Primary_Genre']].copy()
+IMDB = wide_data[['Title','IMDB_Rating','Genre', 'Runtime', 'MPAA/TV_Rating', 'Release_Date','Month', 'Year', 'Decade', 'Primary_Genre', 'Country']].copy()
+Metascore = wide_data[['Title','Metascore','Genre', 'Runtime', 'MPAA/TV_Rating', 'Release_Date','Month', 'Year', 'Decade', 'Primary_Genre', 'Country']].copy()
+RT_Critic = wide_data[['Title','RT_critic','Genre', 'Runtime', 'MPAA/TV_Rating', 'Release_Date','Month', 'Year', 'Decade', 'Primary_Genre', 'Country']].copy()
+RT_Audience = wide_data[['Title','RT_audience','Genre', 'Runtime', 'MPAA/TV_Rating', 'Release_Date','Month', 'Year', 'Decade', 'Primary_Genre', 'Country']].copy()
 
 IMDB['Source'] = 'IMDB'
 Metascore['Source'] = 'Metascore'
@@ -319,6 +319,7 @@ source_list = [IMDB, Metascore, RT_Critic, RT_Audience]
 comparison_data = IMDB.append(Metascore.append(RT_Critic.append(RT_Audience)))
 
 comparison_data = comparison_data[~np.isnan(comparison_data['Rating'])].reset_index(drop=True)
+
 
 critics_data = Metascore.append(RT_Critic)
 audience_data = IMDB.append(RT_Audience)
